@@ -18,7 +18,7 @@ builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>
 {
-    options.ReturnHttpNotAcceptable =true;
+    options.ReturnHttpNotAcceptable = true;
 })
     .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters();
@@ -26,6 +26,9 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
 #if DEBUG
 builder.Services.AddTransient<IMailService, LocalMailService>();
 #else
@@ -33,29 +36,41 @@ builder.Services.AddTransient<IMailService,CloudMailService>();
 #endif
 
 builder.Services.AddSingleton<CitiesDataStore>();
-#region DbContext
 builder.Services.AddDbContext<CityInfoDbContext>(option =>
 {
     option.UseSqlite(
         builder.Configuration["ConnectionStrings:CityConnectionString"]
         );
 });
-#endregion
-builder.Services.AddScoped<ICityInfoRepository,CityInfoRepository>();
+
+builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+
+#region Pipeline
+
+if(app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-   // app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthorization();
 
-app.MapControllers();
+//  Controller/Action/id?
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+
+#endregion
+
+
 
 app.Run();

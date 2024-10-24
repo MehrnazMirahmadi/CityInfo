@@ -1,4 +1,6 @@
-﻿using CityInfo.API.Models;
+﻿using AutoMapper;
+using CityInfo.API.Models;
+using CityInfo.API.Repositoties;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CityInfo.API.Controllers
@@ -7,34 +9,34 @@ namespace CityInfo.API.Controllers
     [Route("api/Cities")]
     public class CitiesController: ControllerBase
     {
-        private readonly CitiesDataStore citiesDataStore;
-        public CitiesController(CitiesDataStore citiesDataStore)
+       private readonly ICityInfoRepository _cityInfoRepository;
+        private readonly IMapper _mapper;
+
+        public CitiesController(ICityInfoRepository cityInfoRepository,IMapper mapper)
         {
-            this.citiesDataStore = citiesDataStore;
+            _cityInfoRepository = cityInfoRepository ?? 
+                throw new ArgumentNullException(nameof(cityInfoRepository));
+
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
         [HttpGet]
-        public ActionResult<IEnumerable<CityDto>> GetCities()
+        public async Task<ActionResult<IEnumerable<CityWithoutPointOfInterestDto>>> GetCities()
         {
-            return Ok(citiesDataStore.Cities);
+            var Cities =await _cityInfoRepository.GetCitiesAsync();
+
+            return Ok(
+                _mapper.Map<IEnumerable<CityWithoutPointOfInterestDto>>(Cities)
+                );
+    
         }
 
         [HttpGet("{id}")]
         public ActionResult<CityDto> GetCity(int id)
         {
 
-            var cityToReturn = citiesDataStore.Cities
-                 .FirstOrDefault(c => c.Id == id);
-
-            if(cityToReturn  == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(cityToReturn);
-
-            
+            return Ok();
+   
         }
 
-     
     }
 }

@@ -11,10 +11,12 @@ namespace CityInfo.API.Controllers
 
         FileExtensionContentTypeProvider fileExtensionContentTypeProvider;
 
-        public FilesController(FileExtensionContentTypeProvider fileExtensionContentTypeProvider) // For FileType
+        public FilesController(FileExtensionContentTypeProvider fileExtensionContentTypeProvider)
         {
             this.fileExtensionContentTypeProvider = fileExtensionContentTypeProvider;
         }
+
+
         [HttpGet("{fileId}")]
         public ActionResult GetFile(string fileId)
         {

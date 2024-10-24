@@ -10,7 +10,6 @@ namespace CityInfo.API.Controllers
     [ApiController]
     public class PointsOfInterestController : ControllerBase
     {
-        #region DI
         private readonly ILogger<PointsOfInterestController> _logger;
         private readonly IMailService _localMailService;
         private readonly CitiesDataStore citiesDataStore;
@@ -19,21 +18,19 @@ namespace CityInfo.API.Controllers
             IMailService localMailService,
             CitiesDataStore citiesDataStore)
         {
-            _logger = loger ?? throw new ArgumentNullException(nameof(loger));
+            _logger  = loger ?? throw new ArgumentNullException(nameof(loger));
             _localMailService = localMailService ?? throw new ArgumentNullException(nameof(localMailService));
             this.citiesDataStore = citiesDataStore;
         }
 
-        #endregion
 
-        #region GetAllCitiesPointOfInterest
         [HttpGet]
         public ActionResult<IEnumerable<PointOfInterestDto>>
-           GetPointsOfInterest(int cityId)
+            GetPointsOfInterest(int cityId)
         {
             try
             {
-                throw new Exception("Exeption sample ...");
+               // throw new Exception("Exeption sample ...");
                 var city =
                 citiesDataStore.Cities
                 .FirstOrDefault(c => c.Id == cityId);
@@ -45,19 +42,19 @@ namespace CityInfo.API.Controllers
                 }
                 return Ok(city.PointsOfInterest);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 _logger.LogCritical($"Exeption getting  {cityId}", ex);
                 return StatusCode(500, "A Problem happend while ....");
             }
-        }
-        #endregion
 
-        #region GetForEachCityPointOfInterest
+            
+        }
+
         [HttpGet("{pointOfInterestId}", Name = "GetPointOfInterest")]
         public ActionResult<PointOfInterestDto> GetPointOfInterest(
-           int cityId, int pointOfInterestId
-           )
+            int cityId, int pointOfInterestId
+            )
         {
             var city =
                 citiesDataStore.Cities
@@ -78,16 +75,19 @@ namespace CityInfo.API.Controllers
 
             return Ok(point);
         }
-        #endregion
 
-        #region Post
-
+        #region  Post
         [HttpPost]
         public ActionResult<PointOfInterestDto> CreatePointOfInterest(
-            int cityId,
-            PointOfInterestForCreationDto pointOfInterest
-            )
+          int cityId,
+          PointOfInterestForCreationDto pointOfInterest
+          )
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var city = citiesDataStore
                 .Cities.FirstOrDefault(c => c.Id == cityId);
             if (city == null)
@@ -121,11 +121,12 @@ namespace CityInfo.API.Controllers
                 );
         }
         #endregion
+
         #region Edit
         [HttpPut("{pontiOfInterestId}")]
         public ActionResult UpdatePointOfInterest(int cityId,
-           int pontiOfInterestId,
-           PointOfInterestForUpdateDto pointOfInterest)
+            int pontiOfInterestId,
+            PointOfInterestForUpdateDto pointOfInterest)
         {
             //find  city
             var city = citiesDataStore.Cities
@@ -146,15 +147,15 @@ namespace CityInfo.API.Controllers
 
         }
         #endregion
-        #region Edit with PAtch
+
+        #region  Edit with patch
         [HttpPatch("{pontiOfInterestid}")]
         public ActionResult PartiallyUpdatePointOfOnterest(
             int cityId,
             int pontiOfInterestid,
-            JsonPatchDocument<PointOfInterestForUpdateDto> patchDocument)
+            JsonPatchDocument<PointOfInterestForUpdateDto>  patchDocument
+            )
         {
-
-
             //find  city
             var city = citiesDataStore.Cities
                 .FirstOrDefault(c => c.Id == cityId);
@@ -170,45 +171,47 @@ namespace CityInfo.API.Controllers
             var pointOfInterestToPatch = new PointOfInterestForUpdateDto()
             {
                 Name = pointOfInterestFromStore.Name,
-                Description = pointOfInterestFromStore.Description
+                Description=pointOfInterestFromStore.Description
             };
 
-            patchDocument.ApplyTo(pointOfInterestToPatch, ModelState);
+            patchDocument.ApplyTo(pointOfInterestToPatch,  ModelState);
 
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            if (!TryValidateModel(pointOfInterestToPatch))
+            if(!TryValidateModel(pointOfInterestToPatch))
             {
-                return BadRequest(modelState: ModelState);
+                return  BadRequest(modelState: ModelState);
             }
+
             pointOfInterestFromStore.Name = pointOfInterestToPatch.Name;
             pointOfInterestFromStore.Description = pointOfInterestToPatch.Description;
 
             return NoContent();
         }
+
         #endregion
+
         #region Delete
-        [HttpDelete("{pointOfInterestId}")]
-        public ActionResult DeletePointOfInterest(int cityId, int pointOfInterestId)
+        [HttpDelete("{pontiOfInterestId}")]
+        public ActionResult DeletePointOfInterest(
+            int cityId,
+            int pontiOfInterestId)
         {
-            // Find city
+            //find  city
             var city = citiesDataStore.Cities
                 .FirstOrDefault(c => c.Id == cityId);
-
             if (city == null)
                 return NotFound();
 
-            // Find point of interest
+            // find point of interest
             var point = city.PointsOfInterest
-                .FirstOrDefault(p => p.Id == pointOfInterestId);
-
+                .FirstOrDefault(p => p.Id == pontiOfInterestId);
             if (point == null)
                 return NotFound();
 
-            // Remove point of interest
             city.PointsOfInterest.Remove(point);
 
             _localMailService

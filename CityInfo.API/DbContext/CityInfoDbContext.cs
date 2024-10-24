@@ -8,7 +8,7 @@ namespace CityInfo.API.DbContexts
 
         public CityInfoDbContext
             (DbContextOptions<CityInfoDbContext> options)
-            :base(options)
+            : base(options)
         {
 
         }
@@ -21,6 +21,52 @@ namespace CityInfo.API.DbContexts
         //    optionsBuilder.UseSqlite();
         //    base.OnConfiguring(optionsBuilder);
         //}
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>()
+                .HasData(
+                new City("Tehran")
+                {
+                    Id = 1,
+                    Description = "This is Tehran"
+                },
+                 new City("Shiraz")
+                 {
+                     Id = 2,
+                     Description = "This is Shiraz"
+                 },
+                  new City("Tabriz")
+                  {
+                      Id = 3,
+                      Description = "This is Tabriz"
+                  }
+                );
+            modelBuilder.Entity<PointOfInterest>()
+                .HasData(
+                new PointOfInterest("Academy Barnamenevisan")
+                {
+                    Id = 1,
+                    CityId = 1,
+                    Description = "Tell 02188454816"
+                },
+                 new PointOfInterest("Shemiran")
+                 {
+                     Id = 2,
+                     CityId = 1,
+                     Description = "This is Shemiran"
+                 },
+                   new PointOfInterest("Meydan ToopKhoone")
+                   {
+                       Id = 3,
+                       CityId = 1,
+                       Description = "This is ToopKhoone"
+                   }
+                );
+
+
+            base.OnModelCreating(modelBuilder);
+        }
 
     }
 }
