@@ -133,82 +133,82 @@ namespace CityInfo.API.Controllers
         }
         #endregion
 
-        //#region  Edit with patch
-        //[HttpPatch("{pontiOfInterestid}")]
-        //public ActionResult PartiallyUpdatePointOfOnterest(
-        //    int cityId,
-        //    int pontiOfInterestid,
-        //    JsonPatchDocument<PointOfInterestForUpdateDto>  patchDocument
-        //    )
-        //{
-        //    //find  city
-        //    var city = citiesDataStore.Cities
-        //        .FirstOrDefault(c => c.Id == cityId);
-        //    if (city == null)
-        //        return NotFound();
+        #region  Edit with patch
+        [HttpPatch("{pontiOfInterestid}")]
+        public async Task<ActionResult> PartiallyUpdatePointOfOnterest(
+            int cityId,
+            int pontiOfInterestid,
+            JsonPatchDocument<PointOfInterestForUpdateDto> patchDocument
+            )
+        {
+           if(!await _cityInfoRepository.CityExistsAsync(cityId))
+            {
+                return NotFound();
+            }
 
-        //    // find point of interest
-        //    var pointOfInterestFromStore = city.PointOfInterest
-        //        .FirstOrDefault(p => p.Id == pontiOfInterestid);
-        //    if (pointOfInterestFromStore == null)
-        //        return NotFound();
+            var pointEntity = await _cityInfoRepository
+                 .GetPointsOfInterestForCityAsync(cityId, pontiOfInterestid);
+            if(pointEntity == null)
+            {
+                return NotFound();
+            }
 
-        //    var pointOfInterestToPatch = new PointOfInterestForUpdateDto()
-        //    {
-        //        Name = pointOfInterestFromStore.Name,
-        //        Description=pointOfInterestFromStore.Description
-        //    };
+            var pointToPatch = _mapper.Map<PointOfInterestForUpdateDto>
+                (pointEntity);
 
-        //    patchDocument.ApplyTo(pointOfInterestToPatch,  ModelState);
+            patchDocument.ApplyTo(pointToPatch, ModelState);
 
-        //    if(!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    if(!TryValidateModel(pointOfInterestToPatch))
-        //    {
-        //        return  BadRequest(modelState: ModelState);
-        //    }
+            if(!TryValidateModel(pointToPatch))
+            {
+                return BadRequest(ModelState);
+            }
+            _mapper.Map(pointToPatch,pointEntity);
+            await _cityInfoRepository.SaveChangesAsync();
 
-        //    pointOfInterestFromStore.Name = pointOfInterestToPatch.Name;
-        //    pointOfInterestFromStore.Description = pointOfInterestToPatch.Description;
+            return NoContent();
+        }
 
-        //    return NoContent();
-        //}
+        #endregion
 
-        //#endregion
+        #region Delete
+        [HttpDelete("{pontiOfInterestId}")]
+        public async Task<ActionResult> DeletePointOfInterest(
+            int cityId,
+            int pontiOfInterestId)
+        {
 
-        //#region Delete
-        //[HttpDelete("{pontiOfInterestId}")]
-        //public ActionResult DeletePointOfInterest(
-        //    int cityId,
-        //    int pontiOfInterestId)
-        //{
-        //    //find  city
-        //    var city = citiesDataStore.Cities
-        //        .FirstOrDefault(c => c.Id == cityId);
-        //    if (city == null)
-        //        return NotFound();
+            if (!await _cityInfoRepository.CityExistsAsync(cityId))
+            {
+                return NotFound();
+            }
 
-        //    // find point of interest
-        //    var point = city.PointOfInterest
-        //        .FirstOrDefault(p => p.Id == pontiOfInterestId);
-        //    if (point == null)
-        //        return NotFound();
+            var pointOfInterestEntity =
+                await _cityInfoRepository
+                .GetPointsOfInterestForCityAsync(cityId, pontiOfInterestId);
 
-        //    city.PointOfInterest.Remove(point);
+            if(pointOfInterestEntity == null)
+            {
+                return NotFound();
+            }
 
-        //    _localMailService
-        //        .Send(
-        //        "Point Of intrest deleted",
-        //        $"Point Of Interest {point.Name}with id {point.Id}"
-        //        );
+            _cityInfoRepository.DeletePointOfInterest(pointOfInterestEntity);
+           await _cityInfoRepository.SaveChangesAsync();
 
-        //    return NoContent();
-        //}
+            _localMailService
+                .Send(
+                "Point Of intrest deleted",
+                $"Point Of Interest {pointOfInterestEntity.Name}with id {pointOfInterestEntity.Id}"
+                );
 
-        //#endregion
+            return NoContent();
+        }
+
+        #endregion
     }
 }
 

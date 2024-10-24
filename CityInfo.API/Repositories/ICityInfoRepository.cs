@@ -13,6 +13,7 @@ namespace CityInfo.API.Repositoties
             ,int pointOfInterestId);   
 
         Task AddPointOfInterestForCityAsync(int cityId, PointOfInterest pointOfInterest);
+        void DeletePointOfInterest(PointOfInterest pointOfInterest);
         Task<bool> SaveChangesAsync();
     }
 }
