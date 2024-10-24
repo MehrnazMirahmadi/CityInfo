@@ -6,9 +6,10 @@ namespace CityInfo.API.Repositoties
     { 
         Task<IEnumerable<City>> GetCitiesAsync();
         Task<City?> GetCityAsync(int cityId, bool includePointsOfInterest);
+        Task<bool> CityExistsAsync(int  cityId);
         Task<IEnumerable<PointOfInterest>> 
             GetPointsOfInterestForCityAsync(int  cityId);
-        Task<PointOfInterest?> GetPointOfInterestForCity(int cityId
+        Task<PointOfInterest?> GetPointsOfInterestForCityAsync(int cityId
             ,int pointOfInterestId);   
     }
 }

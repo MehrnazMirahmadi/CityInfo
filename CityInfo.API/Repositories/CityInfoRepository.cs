@@ -12,6 +12,11 @@ namespace CityInfo.API.Repositoties
             _context = context ?? throw new ArgumentException(nameof(context));
         }
 
+        public async Task<bool> CityExistsAsync(int cityId)
+        {
+            return await _context.Cities.AnyAsync(c=>c.Id==cityId);
+        }
+
         public async Task<IEnumerable<City>> GetCitiesAsync()
         {
             return await _context.Cities
@@ -29,7 +34,7 @@ namespace CityInfo.API.Repositoties
                  .Where(c => c.Id == cityId).FirstOrDefaultAsync();
         }
 
-        public async Task<PointOfInterest?> GetPointOfInterestForCity(int cityId,
+        public async Task<PointOfInterest?> GetPointsOfInterestForCityAsync(int cityId,
             int pointOfInterestId)
         {
             return await _context.PointsOfInterest
