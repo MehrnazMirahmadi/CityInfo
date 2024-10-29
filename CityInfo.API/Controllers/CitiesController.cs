@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CityInfo.API.Entities;
 using CityInfo.API.Models;
 using CityInfo.API.Repositoties;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,12 @@ namespace CityInfo.API.Controllers
 
             return Ok(_mapper.Map<CityWithoutPointOfInterestDto>(city));
 
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddCityAsync(City city)
+        {
+           await _cityInfoRepository.AddCityAsync(city);
+            return Ok();
         }
 
     }

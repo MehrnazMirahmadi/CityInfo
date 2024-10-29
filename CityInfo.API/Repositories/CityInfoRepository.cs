@@ -69,5 +69,16 @@ namespace CityInfo.API.Repositoties
         {
            _context.PointsOfInterest.Remove(pointOfInterest);
         }
+
+        public async Task<bool> IsExistChildForCity(int cityId)
+        {
+            return await _context.PointsOfInterest.AnyAsync(c => c.CityId == cityId);
+        }
+
+        public async Task AddCityAsync(City city)
+        {
+         await _context.Cities.AddAsync(city);
+         _context.SaveChangesAsync();
+        }
     }
 }
